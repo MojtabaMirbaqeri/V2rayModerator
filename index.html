@@ -6,13 +6,11 @@
     <title>V2rayMiner - نسخه نهایی</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     
     <style>
         body {
             font-family: 'Vazirmatn', sans-serif;
-            overflow: hidden; /* Prevents scrollbars from the background shapes */
         }
         .aurora-shape {
             position: absolute;
@@ -47,11 +45,13 @@
 </head>
 <body class="bg-gray-900 min-h-screen flex items-center justify-center p-4">
 
-    <div class="aurora-shape w-96 h-96 bg-theme-primary/50 top-[-10%] left-[-5%]"></div>
-    <div class="aurora-shape w-96 h-96 bg-theme-secondary/50 bottom-[-10%] right-[-5%]" style="animation-delay: 5s;"></div>
-    <div class="aurora-shape w-72 h-72 bg-blue-500/30 bottom-[20%] left-[20%]" style="animation-delay: 10s;"></div>
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="aurora-shape w-96 h-96 bg-theme-primary/50 top-[-10%] left-[-5%]"></div>
+        <div class="aurora-shape w-96 h-96 bg-theme-secondary/50 bottom-[-10%] right-[-5%]" style="animation-delay: 5s;"></div>
+        <div class="aurora-shape w-72 h-72 bg-blue-500/30 bottom-[20%] left-[20%]" style="animation-delay: 10s;"></div>
+    </div>
 
-    <div class="w-full max-w-3xl mx-auto bg-white/10 backdrop-blur-xl text-white rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+    <div class="w-full max-w-3xl mx-auto bg-white/10 backdrop-blur-xl text-white rounded-2xl shadow-2xl border border-white/20 overflow-hidden my-8">
         
         <div class="p-6 md:p-8 text-center border-b border-white/10">
             <h1 class="text-3xl md:text-4xl font-black">V2rayMiner</h1>
@@ -102,27 +102,11 @@
         </div>
     </div>
 
-<script>
+    <script>
         // DOM Elements
-        const el = {
-            configInput: document.getElementById('configInput'),
-            fileInput: document.getElementById('fileInput'),
-            urlInput: document.getElementById('urlInput'),
-            fetchUrlButton: document.getElementById('fetchUrlButton'),
-            fetchIcon: document.getElementById('fetchIcon'),
-            loadingIcon: document.getElementById('loadingIcon'),
-            newNameInput: document.getElementById('newNameInput'),
-            processButton: document.getElementById('processButton'),
-            clearButton: document.getElementById('clearButton'),
-            outputSection: document.getElementById('outputSection'),
-            outputBox: document.getElementById('outputBox'),
-            copyButton: document.getElementById('copyButton'),
-            downloadButton: document.getElementById('downloadButton'),
-            successMessage: document.getElementById('successMessage'),
-        };
+        const el = { configInput: document.getElementById('configInput'), fileInput: document.getElementById('fileInput'), urlInput: document.getElementById('urlInput'), fetchUrlButton: document.getElementById('fetchUrlButton'), fetchIcon: document.getElementById('fetchIcon'), loadingIcon: document.getElementById('loadingIcon'), newNameInput: document.getElementById('newNameInput'), processButton: document.getElementById('processButton'), clearButton: document.getElementById('clearButton'), outputSection: document.getElementById('outputSection'), outputBox: document.getElementById('outputBox'), copyButton: document.getElementById('copyButton'), downloadButton: document.getElementById('downloadButton'), successMessage: document.getElementById('successMessage'), };
         let processedContent = "";
 
-        // Event Listeners
         el.fileInput.addEventListener('change', handleFileUpload);
         el.fetchUrlButton.addEventListener('click', handleUrlFetch);
         el.clearButton.addEventListener('click', clearAll);
@@ -130,39 +114,8 @@
         el.copyButton.addEventListener('click', copyToClipboard);
         el.downloadButton.addEventListener('click', downloadResultFile);
 
-        function setLoadingState(isLoading) {
-            el.fetchUrlButton.disabled = isLoading;
-            el.fetchIcon.classList.toggle('hidden', isLoading);
-            el.loadingIcon.classList.toggle('hidden', !isLoading);
-        }
-
-        async function handleUrlFetch() {
-            const url = el.urlInput.value.trim();
-            if (!url) {
-                alert('لطفاً یک لینک معتبر وارد کنید.');
-                return;
-            }
-            setLoadingState(true);
-            
-            // *** CHANGE IS HERE: Using a more reliable CORS proxy ***
-            // We use allorigins.win which is a popular and stable service.
-            // It needs the URL to be encoded to handle special characters.
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-            
-            try {
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                const data = await response.text();
-                el.configInput.value = data;
-                showSuccessMessage('محتوای لینک با موفقیت دریافت شد.');
-            } catch (error) {
-                console.error("Fetch Error:", error);
-                alert('دریافت محتوا از لینک با خطا مواجه شد. لطفاً از صحت لینک اطمینان حاصل کنید.');
-            } finally {
-                setLoadingState(false);
-            }
-        }
-        
+        function setLoadingState(isLoading) { el.fetchUrlButton.disabled = isLoading; el.fetchIcon.classList.toggle('hidden', isLoading); el.loadingIcon.classList.toggle('hidden', !isLoading); }
+        async function handleUrlFetch() { const url = el.urlInput.value.trim(); if (!url) { alert('لطفاً یک لینک معتبر وارد کنید.'); return; } setLoadingState(true); const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`; try { const response = await fetch(proxyUrl); if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`); const data = await response.text(); el.configInput.value = data; showSuccessMessage('محتوای لینک با موفقیت دریافت شد.'); } catch (error) { console.error("Fetch Error:", error); alert('دریافت محتوا از لینک با خطا مواجه شد. لطفاً از صحت لینک و دسترسی CORS اطمینان حاصل کنید.'); } finally { setLoadingState(false); } }
         function handleFileUpload(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => el.configInput.value = e.target.result; reader.readAsText(file); }
         function clearAll() { el.configInput.value = ''; el.newNameInput.value = ''; el.urlInput.value = ''; processedContent = ''; el.outputBox.value = ''; hideOutputSection(); }
         function processAndShow() { const configs = el.configInput.value.trim(); const newName = el.newNameInput.value.trim(); if (!configs || !newName) { alert('لطفاً ورودی کانفیگ‌ها و نام جدید را پر کنید.'); return; } processedContent = configs.split(/\r?\n/).map(line => { const trimmedLine = line.trim(); if (!trimmedLine || !trimmedLine.match(/^(vmess|vless|trojan|ss|ssr):\/\//)) return null; const hashIndex = trimmedLine.lastIndexOf('#'); const baseConfig = hashIndex !== -1 ? trimmedLine.substring(0, hashIndex) : trimmedLine; return `${baseConfig}#${encodeURIComponent(newName)}`; }).filter(Boolean).join('\n'); el.outputBox.value = processedContent; showOutputSection(); }
@@ -171,6 +124,6 @@
         function showOutputSection() { el.outputSection.classList.add('show', 'opacity-100'); }
         function hideOutputSection() { el.outputSection.classList.remove('show', 'opacity-100'); showSuccessMessage('', true); }
         let messageTimeout; function showSuccessMessage(message, isError = false) { clearTimeout(messageTimeout); el.successMessage.textContent = message; el.successMessage.className = `text-center h-5 font-semibold transition-all-fast ${isError ? 'text-red-400' : 'text-green-400'} opacity-100`; messageTimeout = setTimeout(() => { el.successMessage.classList.remove('opacity-100'); }, 3000); }
-          </script>
+    </script>
 </body>
 </html>
